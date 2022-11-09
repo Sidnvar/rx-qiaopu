@@ -3,7 +3,7 @@
     <div class="box-flex" id="branch-right">
         <div class="relative" v-for="(item, key) in data" :key="key">
             <linkLine :set='[[0,1,1.2,1]]' type="vertical_l" v-if="key == 0"></linkLine>
-            <item :id="item.Id" :name="item.Name" :title="`${key != 0 ? '(前)':''}配偶`"></item>
+            <item :id="item.Id" :name="item.Name" :title="[`${key != 0 ? '(前)':''}配偶`]"  :titleIndex="0" ></item>
         </div>
         <div class="relative">
             <branchAdd :title="[`${data.length > 0 ? '(前)':''}配偶`]" @add="revice"></branchAdd>

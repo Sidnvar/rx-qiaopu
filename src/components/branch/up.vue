@@ -12,7 +12,7 @@
                     [4.8, 0, 4.8, 0.6],
                     [3.2, 0.6, 3.2, 1.2]]'></linkLine>
 
-                <item v-if="brand_male.Name" :id="brand_male.Id" :name="brand_male.Name" :title="title[0]" @handleClick="handleClick"></item>
+                <item v-if="brand_male.Name" :id="brand_male.Id" :name="brand_male.Name" :title="title" :titleIndex="0" @handleClick="handleClick"></item>
                 <branch-add v-else :title="[title[0]]" @add="revice"></branch-add>
 
             </div>
@@ -30,7 +30,7 @@
                     [4.8, 0, 4.8, 0.6],
                     [3.2, 0.6, 3.2, 1.2]]'></linkLine>
 
-                <item v-if="brand_famale.Name" :id="brand_famale.Id" :name="brand_famale.Name" :title="title[1]" @handleClick="handleClick"></item>
+                <item v-if="brand_famale.Name" :id="brand_famale.Id" :name="brand_famale.Name" :title="title" :titleIndex="1" @handleClick="handleClick"></item>
                 <branch-add v-else :title="[title[1]]" @add="reviceF"></branch-add>
 
             </div>
@@ -41,7 +41,7 @@
 
 
         </div>
-        <edit :show="editShow" :title="title"></edit>
+        <!-- <edit :show="editShow" :title="title" :data="editData" @close="editShow = false" @submit="editPost"></edit> -->
     </div>
 </template>
 
@@ -77,7 +77,8 @@
                 ],
                 brand_male: null,
                 brand_famale: null,
-                editShow: false
+                editShow: false,
+                editData: null
             }
         },
         methods: {
@@ -140,8 +141,12 @@
                     this.brand_famale.Parent = [module]
                 }
             },
-            handleClick(){
+            handleClick(e){
+                this.editData = e;
                 this.editShow = true
+            },
+            editPost(e){
+
             }
         },
         mounted() {

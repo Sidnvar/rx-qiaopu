@@ -6,7 +6,7 @@
                 <img @click="change" v-if="!customClass && id" class="change" src="../../assets/change.png" />
             </div>
             <div class="title">
-                {{title}}
+                {{title[titleIndex]}}
             </div>
         </div>
     </div>
@@ -18,7 +18,8 @@
     export default {
         props: {
             name: String,
-            title: String,
+            title: Array,
+            titleIndex: Number,
             id: [String, Number],
             customClass: String,
             show: true
@@ -33,7 +34,8 @@
             handleClick() {
                 this.$emit('handleClick', {
                     id: this.id,
-                    name: this.name
+                    name: this.name,
+                    title: this.title
                 })
             }
         }

@@ -18,7 +18,7 @@
                         <branch-left :data="data.Brother"></branch-left>
 
                         <!-- 本人 -->
-                        <branch-item id="self" :name="data.Name" title="本人" customClass="self"></branch-item>
+                        <branch-item id="self" :name="data.Name" :title="['本人']" :titleIndex="0" customClass="self"></branch-item>
 
                         <!-- 分支向右 配偶 -->
                         <branch-right :data="data.Spouse"></branch-right>

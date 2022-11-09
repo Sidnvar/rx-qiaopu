@@ -3,12 +3,12 @@
     <div id="branch-up">
         <div class="box-flex center" v-if="brand_male">
             <div class="relative">
-                <item v-if="brand_male.Name" :id="brand_male.Id" :name="brand_male.Name" :title="title[0]"></item>
+                <item v-if="brand_male.Name" :id="brand_male.Id" :name="brand_male.Name" :title="title" :titleIndex="0"></item>
                 <branch-add v-else :title="[title[0]]" @add="revice"></branch-add>
             </div>
 
             <div class="relative">
-                <item v-if="brand_famale.Name" :id="brand_famale.Id" :name="brand_famale.Name" :title="title[1]"></item>
+                <item v-if="brand_famale.Name" :id="brand_famale.Id" :name="brand_famale.Name" :title="title" :titleIndex="1"></item>
                 <branch-add v-else :title="[title[1]]" @add="reviceF"></branch-add>
             </div>
         </div>

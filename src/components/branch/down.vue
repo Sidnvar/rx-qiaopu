@@ -6,7 +6,7 @@
             <div class="box-flex">
                 <branch-add :title="title" @add="revice" :spouse="spouse"/>
                 <div v-for="(item, key) in data" :key="key">
-                    <item :name="item.Name" :title="item.Sex == '男' ? title[0]:title[1]" :id="item.Id" style="justify-content: flex-end;"></item>
+                    <item :name="item.Name" :title="title" :titleIndex="item.Sex == '男' ? 0 : 1" :id="item.Id" style="justify-content: flex-end;"></item>
                     <branch-down v-if="item.Children && children_title" 
                     :data="item.Children" 
                     :title="children_title" 
