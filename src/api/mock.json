@@ -1,0 +1,81 @@
+{
+    "id": "43000020050614624X",
+    "name": "赖强",
+    "sex": true,
+    "brother": [{
+        "id": "31000019960811350X",
+        "name": "龚娟",
+        "sex": false,
+        "brother": [],
+        "spouse": [],
+        "children": [],
+        "parent": []
+    }],
+    "spouse": [{
+        "id": "4f7o",
+        "name": "毛娜",
+        "sex": false,
+        "brother": [],
+        "spouse": [],
+        "children": [],
+        "parent": [{
+            "id": "&8^",
+            "name": "龙桂英",
+            "sex": "MXE#*Tb",
+            "brother": [],
+            "spouse": [],
+            "children": [],
+            "parent": []
+        }]
+    }],
+    "children": [{
+        "id": "Ew0n8",
+        "name": "康霞",
+        "sex": false,
+        "brother": [],
+        "spouse": [],
+        "children": [{
+            "id": "A#[",
+            "name": "魏娜",
+            "sex": false,
+            "brother": [],
+            "spouse": [],
+            "children": [],
+            "parent": []
+        }],
+        "parent": []
+    }],
+    "parent": [{
+        "id": "o%Mz",
+        "name": "廖平",
+        "sex": false,
+        "brother": [],
+        "spouse": [{
+            "id": "xUa(k",
+            "name": "潘秀英",
+            "sex": true,
+            "brother": [],
+            "spouse": [],
+            "children": [],
+            "parent": [{
+                "id": "DnQx",
+                "name": "彭军",
+                "sex": "u&(e",
+                "brother": [],
+                "spouse": [],
+                "children": [],
+                "parent": []
+            }]
+        }],
+        "children": [],
+        "parent": [{
+            "id": "AdX",
+            "name": "常磊",
+            "sex": "#x^bp",
+            "brother": [],
+            "spouse": [],
+            "children": [],
+            "parent": []
+        }]
+    }]
+}
