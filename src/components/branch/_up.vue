@@ -3,12 +3,12 @@
     <div id="branch-up">
         <div class="box-flex center" v-if="brand_male">
             <div class="relative">
-                <item v-if="brand_male.name" :id="brand_male.id" :name="brand_male.name" :title="title[0]"></item>
+                <item v-if="brand_male.Name" :id="brand_male.Id" :name="brand_male.Name" :title="title[0]"></item>
                 <branch-add v-else :title="[title[0]]" @add="revice"></branch-add>
             </div>
 
             <div class="relative">
-                <item v-if="brand_famale.name" :id="brand_famale.id" :name="brand_famale.name" :title="title[1]"></item>
+                <item v-if="brand_famale.Name" :id="brand_famale.Id" :name="brand_famale.Name" :title="title[1]"></item>
                 <branch-add v-else :title="[title[1]]" @add="reviceF"></branch-add>
             </div>
         </div>
@@ -20,7 +20,8 @@
     import branchAdd from "./add.vue"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
-    import Bus from "@/lib/bus"
+    import { treeChange } from "@/lib/common"
+
     export default {
         name: 'branch-up',
         components: {
@@ -47,42 +48,62 @@
             }
         },
         methods: {
-            reviceF(e) {
+            async reviceF(e) {
                 const {
                     data
                 } = this;
 
-                data[0].spouse = [e];
+                const params = await treeChange(e)
+
+                data[1] = params;
                 this.inifData();
                 this.$forceUpdate();
-                Bus.$emit('treeChange', e)
 
             },
-            revice(e) {
+            async revice(e) {
                 const {
                     data
                 } = this;
-                data[0] = e;
+                const params = await treeChange(e)
+
+                data[0] = params;
                 this.inifData();
                 this.$forceUpdate();
-                Bus.$emit('treeChange', e)
 
             },
             inifData() {
-                this.brand_male = this.data[0];
-                this.brand_famale = this.brand_male.spouse[0] || {
-                    id: null,
-                    name: null,
-                    parent: [],
-                    spouse: []
-                };
+                const module = {
+                    Id: null,
+                    Name: null,
+                    Parent: [{
+                        Id: null,
+                        Name: null,
+                        Parent: [],
+                        Spouse: []
+                    }],
+                    Spouse: [{
+                        Id: null,
+                        Name: null,
+                        Parent: [],
+                        Spouse: []
+                    }]
+                }
+
+                this.brand_male = this.data[0] || module;
+                this.brand_famale = this.data[1] || module;
             }
         },
         mounted() {
-            if (this.data.length != 0) {
-                this.inifData();
-            }
+            this.inifData();
         },
+        watch:{
+            data:{
+                handler(){
+                    this.inifData();
+                },
+                deep: true
+            }
+        }
     }
 </script>
 

@@ -1,14 +1,11 @@
 <template>
     <div>
-        <van-nav-bar title="侨谱录入" />
-        <!-- <div class="progress" v-show="percentage != 100">
-            <van-progress class="progress-bar" :percentage="percentage" />
-        </div> -->
-        <div class="branch" ref="branch">
+        <!-- <van-nav-bar title="侨谱录入" /> -->
+        <div class="branch" ref="branch" id="branch">
             <div style="width: min-content;" v-if="data">
 
                 <!-- 分支向上 长辈 -->
-                <branch-up :data="data.parent" :index="0"></branch-up>
+                <branch-up :data="data.Parent" :index="0"></branch-up>
 
                 <div class="relative">
                     <linkLine style="left: calc(50% - 8rem);" :set='[
@@ -18,19 +15,19 @@
                     [8, .6, 8, 1.2]]'></linkLine>
                     <div class="box-flex center">
                         <!-- 分支向左 兄弟 -->
-                        <branch-left :data="data.brother"></branch-left>
+                        <branch-left :data="data.Brother"></branch-left>
 
                         <!-- 本人 -->
-                        <branch-item :name="data.name" title="本人" customClass="self"></branch-item>
+                        <branch-item id="self" :name="data.Name" title="本人" customClass="self"></branch-item>
 
                         <!-- 分支向右 配偶 -->
-                        <branch-right :data="data.spouse"></branch-right>
+                        <branch-right :data="data.Spouse"></branch-right>
                     </div>
 
                 </div>
-
                 <!-- 分支向下 儿孙 -->
-                <branch-down :data="data.children" :index="0"></branch-down>
+                <branch-down :data="data.Children" :index="0" :parentSex="parentSex" :last="false"
+                    :spouse="data.Spouse"></branch-down>
 
             </div>
 
@@ -40,6 +37,10 @@
                 </van-button>
             </div>
         </div>
+        <div class="progress" v-if="percentage < 100">
+            <van-progress :percentage="percentage" />
+        </div>
+
 
         <van-popup v-model="popupShow">
             <div style="width:90vw;margin:.6rem">
@@ -47,13 +48,13 @@
                     <van-cell-group>
                         <van-field name="radio" label="">
                             <template #input>
-                                <h2>检测“{{popupData.name}}”与其它侨谱中有重名，是否关联？</h2>
+                                <h2>检测“{{popupData.Name}}”与其它侨谱中有重名，是否关联？</h2>
                             </template>
                         </van-field>
 
                     </van-cell-group>
                     <van-cell-group>
-                        <van-field v-model="formData.name" name="姓名" :placeholder="`请输入${popupData.name}的父亲的姓名`" />
+                        <van-field v-model="formData.name" name="姓名" :placeholder="`如需要关联，请输入${popupData.Name}父亲姓名`" />
                     </van-cell-group>
                     <div style="display:flex;margin-top:.3rem;padding:.3rem">
                         <van-button round block size="normal" native-type="submit" @click="popupShow = false">
@@ -61,8 +62,8 @@
                         </van-button>
                         <div style="width:.6rem"></div>
                         <van-button color="#4D77FF" round block type="primary" size="normal" native-type="submit"
-                            @click="post">
-                            提交
+                            @click="postLink">
+                            关联
                         </van-button>
                     </div>
                 </van-form>
@@ -75,6 +76,13 @@
     import {
         getData
     } from "@/api/mock"
+    import {
+        GetUserRelation,
+        getToken,
+        EditUserRelation
+    } from "@/api/index"
+    import { Dialog, Toast } from 'vant';
+    import 'vant/es/dialog/style';
     import branchItem from "@/components/branch/item";
     import branchUp from "@/components/branch/up";
     import branchDown from "@/components/branch/down";
@@ -101,54 +109,119 @@
                 },
                 formData: {
                     name: ''
-                }
+                },
+                centerId: 1,
+                parentSex: 0,
+                isChanging: false // 数据是否修改过
             }
         },
-        mounted() {
-            this.getData();
+       async mounted() {
+            await getToken();
+            console.log(this.$route.query.returnUrl)
+            this.getData(this.$route.query.id);
 
             Bus.$on('change', res => {
-                this.getData();
+                const change = () => {
+                            this.data = [];
+                            this.$forceUpdate();
+                            this.centerId = res.id;
+                            this.getData(res.id);
+                }
+                if (this.isChanging) {
+                    Dialog.confirm({
+                            title: '警告',
+                            message: `谱系图中有未保存的数据，切换【${res.name}】数据将丢失`,
+                        })
+                        .then(() => {
+                            // on confirm
+                            change();
+                        })
+                        .catch(() => {
+                            // on cancel
+                        });
+
+                    return
+                }
+
+                change();
             })
 
             Bus.$on('treeChange', res => {
+                this.isChanging = true;
                 // do ajax
 
-                console.log(this.data)
-
-                setTimeout(() => {
+                // const {
+                //     Name,
+                //     Sex
+                // } = res;
+                // CheckUserName({
+                //     Name,
+                //     Sex,
+                //     Id: 0
+                // }).then(res => {
                     this.setStyle();
 
-                    // 如果重名
-                    this.theSameName(res);
-                }, 500)
+                //     console.log(res)
+                // })
+
+                // setTimeout(() => {
+                //     this.setStyle();
+
+                //     // 如果重名
+                //     this.theSameName(res);
+                // }, 500)
             })
 
         },
         methods: {
-            post() {},
-            progressRandom() {
-
+            post() {
+                EditUserRelation([this.data]).then(res => {
+                    this.isChanging = false;
+                    
+                    if(res.Code == 200){
+                        Toast('保存成功');
+                        setTimeout(() => {
+                            location.href = this.$route.query.returnUrl;
+                        }, 3000)
+                    }
+                    
+                    // this.getData(this.centerId)
+                    // console.log(res)
+                })
             },
+            postLink() {},
             theSameName(data) {
                 this.popupData = data;
                 this.popupShow = true;
             },
-            getData() {
+            setPercentage(max) {
+                setTimeout(() => {
+                    this.percentage++
+                    if (max == this.percentage) {
+                        return
+                    }
+
+                    this.setPercentage(max);
+                }, 10)
+            },
+            getData(id = 1) {
                 this.percentage = 0;
-                getData().then(res => {
-                    this.percentage = 70;
-                    this.data = res;
+                GetUserRelation({
+                    userId: id
+                }).then(res => {
+                    this.setPercentage(70);
+                    this.data = res.Data[0];
+                    this.parentSex = this.data.Sex == '男' ? 0 : 1;
+                    // console.log(this.parentSex)
                     // this.initZoom();
 
                     setTimeout(() => {
                         this.setStyle();
+                        this.setCenter();
                     }, 500)
                 });
             },
             setStyle() {
-
-
                 const up = document.getElementById('branch-up')
                 const left = document.getElementById('branch-left')
                 const right = document.getElementById('branch-right')
@@ -163,16 +236,33 @@
                 left.style.width = max + 'px'
                 right.style.width = max + 'px'
                 down.style.width = max + fontSize * 3.2 + 'px'
-
-                this.percentage = 100;
-
-
+                this.setPercentage(100);
+            },
+            setCenter() {
+                // this.$refs.branch.$el;
+                // console.log(this.$refs.branch)
+                const main = document.getElementById('branch');
+                const self = document.getElementsByClassName('self')[0];
+                const width = document.body.clientWidth;
+                const height = document.body.clientHeight;
+                main.scrollLeft = self.offsetLeft - width / 2.3
+                main.scrollTop = self.offsetTop + height / 1.7
             }
         }
     }
 </script>
 
 <style lang="less">
+    .progress {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: white;
+        padding-top: 45vh;
+    }
+
     .link {
         height: 1.2rem;
         margin-top: -.6rem;
@@ -207,19 +297,16 @@
         }
     }
 
-    .branch,
-    .progress {
+    .branch {
         transform-origin: 0 0;
         overflow: scroll;
         height: calc(100vh - 1.22667rem);
         width: 100%;
         padding-bottom: 2rem;
+        padding-top: 2rem;
     }
 
-    .progress-bar {
-        margin: 1rem;
-        margin-top: 50%;
-    }
+
 
     .box {
         margin: .6rem;

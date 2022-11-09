@@ -4,11 +4,11 @@
         <linkLine :set='sets' type="vertical_r"></linkLine>
 
         <div>
-            <branch-add :title="['兄弟','姐妹']" @add="revice" />
+            <branch-add :title="title" @add="revice" />
         </div>
 
         <div v-for="(item, key) in data" :key="key">
-            <item :id="item.id" :name="item.name" title="兄弟"></item>
+            <item :id="item.Id" :name="item.Name" :title="item.Sex == '男' ? title[0]:title[1]"></item>
         </div>
     </div>
 </template>
@@ -17,7 +17,8 @@
     import branchAdd from "./add.vue"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
-    import Bus from "@/lib/bus"
+    import { treeChange } from "@/lib/common"
+
     export default {
         props: {
             data: Array
@@ -29,7 +30,8 @@
         },
         data() {
             return {
-                sets: []
+                sets: [],
+                title:['兄弟','姐妹']
             }
         },
         mounted() {
@@ -46,12 +48,14 @@
             }
         },
         methods: {
-            revice(e) {
+            async revice(e) {
                 const {
                     data
                 } = this;
-                data.unshift(e);
-                Bus.$emit('treeChange', e)
+
+                const params = await treeChange(e)
+
+                data.unshift(params);
             },
             addLinkLine() {
                 this.sets = [];

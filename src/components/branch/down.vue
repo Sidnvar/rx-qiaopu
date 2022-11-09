@@ -1,21 +1,23 @@
 // 分支向下 儿孙
 <template>
     <div id="branch-down">
-        <div class="branch-down relative" v-if="data.length > 0">
+        <div class="branch-down relative" >
             <linkLine :transform="'transform'" :set='sets'></linkLine>
             <div class="box-flex">
-                <branch-add :title="title" @add="revice" />
+                <branch-add :title="title" @add="revice" :spouse="spouse"/>
                 <div v-for="(item, key) in data" :key="key">
-                    <item :name="item.name" :title="item.sex ? title[0]:title[1]" :id="item.id" style="justify-content: flex-end;"></item>
-                    <branch-down v-if="item.children" 
-                    :data="item.children" 
+                    <item :name="item.Name" :title="item.Sex == '男' ? title[0]:title[1]" :id="item.Id" style="justify-content: flex-end;"></item>
+                    <branch-down v-if="item.Children && children_title" 
+                    :data="item.Children" 
                     :title="children_title" 
                     :index="key"
+                    :parentSex="parentSex"
+                    :last="true"
                     ></branch-down>
                 </div>
             </div>
         </div>
-
+        
     </div>
 </template>
 
@@ -23,7 +25,7 @@
     import branchAdd from "./add.vue"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
-    import Bus from "@/lib/bus"
+    import { treeChange } from "@/lib/common"
 
     export default {
         name: 'branch-down',
@@ -36,7 +38,10 @@
             index: {
                 type: [Number, String],
                 dafault: () => '0'
-            }
+            },
+            parentSex: [Number, String],
+            last: Boolean,
+            spouse: Array
         },
         components: {
             branchAdd,
@@ -48,8 +53,8 @@
                 widthL: 0,
                 brand_children: null,
                 sets: null,
-                _titles: ['孙子', '孙女', '外孙', '外孙女'],
-                children_title: ['孙子', '孙女']
+                titles: [['孙子', '孙女'], ['外孙', '外孙女']],
+                children_title: null
             }
         },
         methods:{
@@ -58,7 +63,7 @@
                 let length = 0.5;
                
                 for(let i = this.data.length-1; i >= 0; i--){
-                    length += this.data[i].children.length+1;
+                    length += this.data[i].Children.length+1;
                    
                     this.sets.push([
                         3.2 * length,
@@ -74,13 +79,20 @@
                 }
 
             },
-            revice(e){
-                const { data, index } = this;
-                data.unshift(e);
-                Bus.$emit('treeChange', e)
+            async revice(e){
+                const { data } = this;
+                const params = await treeChange(e)
+                data.unshift(params);
+
+                // Bus.$emit('treeChange', e)
             }
         },
         mounted() {
+            // debugger
+            if(!this.last){
+                this.children_title = this.titles[this.parentSex]
+            }
+
             setTimeout(() => {
                 this.addLinkLine();
             }, 50)

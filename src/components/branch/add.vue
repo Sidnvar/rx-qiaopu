@@ -18,14 +18,19 @@
                         <van-field name="radio" label="">
                             <template #input>
                                 <van-radio-group v-model="checked" direction="horizontal">
-                                    <van-radio :name="item" v-for="(item, key) in title" :key="key">{{item}}</van-radio>
+                                    <van-radio :name="key" v-for="(item, key) in title" :key="key">{{item}}</van-radio>
                                 </van-radio-group>
                             </template>
                         </van-field>
-
                     </van-cell-group>
                     <van-cell-group>
-                        <van-field v-model="username" name="姓名"  :placeholder="`请输入${checked}姓名`" />
+                        <van-field v-model="username" name="姓名" :placeholder="`请输入${title[checked]}姓名`" />
+                    </van-cell-group>
+                    <van-cell-group v-if="spouse.length > 1">
+                        <select class="select" v-model="parent">
+                            <option value="请选择父/母" checked>请选择父/母</option>
+                            <option v-for="(item, key) in spouse" :key="key" :value="item">{{item.Name}}</option>
+                        </select>
                     </van-cell-group>
                     <div style="display:flex;margin-top:.3rem;padding:.3rem">
                         <van-button round block  size="normal" native-type="submit" @click="show = false">
@@ -45,31 +50,37 @@
 <script>
     export default {
         props: {
-            title: Array
+            title: Array,
+            spouse: {
+                type: Array,
+                default: () => []
+            }
         },
         data() {
             return {
                 show: false,
                 username: null,
+                parent: '请选择父/母',
                 checked: null
             }
         },
         methods:{
             add(){
                 this.show = false;
+                const Parent = this.parent == '请选择父/母' ? [] : [this.parent];
                 this.$emit('add', {
-                    id: null,
-                    name: this.username,
-                    sex: this.checked,
-                    children: [],
-                    parent: [],
-                    brother: [],
-                    spouse: []
+                    Id: null,
+                    Name: this.username,
+                    Sex: this.checked == 0 ? '男': '女',
+                    Children: [],
+                    Parent,
+                    Brother: [],
+                    Spouse: []
                 })
             }
         },
         mounted(){
-            this.checked = this.title[0];
+            this.checked = 0;
             // console.log(this.checked)
         }
     }
@@ -80,6 +91,14 @@
         justify-content: center;
     }
     .van-field__control{
+        text-align: center;
+    }
+    .select{
+        width: 100%;
+        background: transparent;
+        height: 1.15rem;
+        color: #323233;
+        font-size: inherit;
         text-align: center;
     }
 

@@ -2,14 +2,26 @@ import axios from 'axios'
 
 // create an axios instance
 const service = axios.create({
-  baseURL: 'http://127.0.0.1:8686', // url = base url + request url
+  baseURL: 'http://192.168.0.60:9103', // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
 
 // request interceptor
 service.interceptors.request.use(
-  config => config
+  config => {
+    // config.url += '?UserNo=' + UserNo;
+    config.url += '?userNo=1';
+  
+    if(!!config.url.indexOf('/Token/GetToken')){
+      // const { token } = store.state.base;
+      // sessionStorage.getItem('token')
+
+      config.headers.token = sessionStorage.getItem('token');
+    }
+
+    return config
+  }
 )
 
 // response interceptor
