@@ -8,7 +8,7 @@
         </div>
 
         <div v-for="(item, key) in data" :key="key">
-            <item :id="item.Id" :name="item.Name" :title="title" :titleIndex="item.Sex == '男' ? 0 : 1" ></item>
+            <item :id="item.Id" :item="item" :name="item.Name" :title="title" :titleIndex="item.Sex == '男' ? 0 : 1" ></item>
         </div>
     </div>
 </template>

@@ -3,10 +3,10 @@
     <div class="box-flex" id="branch-right">
         <div class="relative" v-for="(item, key) in data" :key="key">
             <linkLine :set='[[0,1,1.2,1]]' type="vertical_l" v-if="key == 0"></linkLine>
-            <item :id="item.Id" :name="item.Name" :title="[`${key != 0 ? '(前)':''}配偶`]"  :titleIndex="0" ></item>
+            <item :item="item" :id="item.Id" :name="item.Name" :title="[`${key != 0 ? '(前)':''}配偶`]"  :titleIndex="0" ></item>
         </div>
         <div class="relative">
-            <branchAdd :title="[`${data.length > 0 ? '(前)':''}配偶`]" @add="revice"></branchAdd>
+            <branchAdd :title="[addTitle]" @add="revice"></branchAdd>
         </div>
     </div>
 </template>
@@ -26,14 +26,28 @@
             item,
             linkLine
         },
+        data(){
+            return {
+                addTitle: '配偶'
+            }
+        },
         methods: {
             async revice(e) {
                 const {
                     data
                 } = this;
-
                 const params = await treeChange(e)
                 data.push(params);
+            }
+        },
+        watch:{
+            "data":function(newValue){
+                if(newValue){
+                    this.addTitle = newValue.length >= 1 ? '前配偶' : '配偶'
+                }else{
+                    this.addTitle = '前配偶'
+
+                }
             }
         }
     }

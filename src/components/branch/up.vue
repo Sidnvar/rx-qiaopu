@@ -1,10 +1,10 @@
 // 分支向上 长辈组件
 <template>
     <div class="" id="branch-up" v-if="index < 2">
-        <div class="box-flex center" v-if="brand_male">
+        <div class="box-flex center" v-if="data[0]">
             <div class="relative">
 
-                <Pup v-if="brand_male.Parent.length != 0" :data="brand_male.Parent" :title="grand[0]"></Pup>
+                <Pup v-if="data[0].Parent.length != 0" :data="data[0].Parent" :title="grand[0]"></Pup>
 
                 <linkLine :set='[
                     [1.6, 0.6, 4.8, 0.6],
@@ -12,7 +12,7 @@
                     [4.8, 0, 4.8, 0.6],
                     [3.2, 0.6, 3.2, 1.2]]'></linkLine>
 
-                <item v-if="brand_male.Name" :id="brand_male.Id" :name="brand_male.Name" :title="title" :titleIndex="0" @handleClick="handleClick"></item>
+                <item v-if="data[0].Name" :item="data[0]" :id="data[0].Id" :name="data[0].Name" :title="title" :titleIndex="data[0].Sex == '男' ? 0 : 1"></item>
                 <branch-add v-else :title="[title[0]]" @add="revice"></branch-add>
 
             </div>
@@ -22,7 +22,7 @@
                     ref="spouseParent">
                 </branch-up> -->
 
-                <Pup v-if="brand_famale.Parent" :data="brand_famale.Parent" :title="grand[1]"></Pup>
+                <Pup v-if="data[1].Parent" :data="data[1].Parent" :title="grand[1]"></Pup>
 
                 <linkLine :set='[
                     [1.6, 0.6, 4.8, 0.6],
@@ -30,7 +30,7 @@
                     [4.8, 0, 4.8, 0.6],
                     [3.2, 0.6, 3.2, 1.2]]'></linkLine>
 
-                <item v-if="brand_famale.Name" :id="brand_famale.Id" :name="brand_famale.Name" :title="title" :titleIndex="1" @handleClick="handleClick"></item>
+                <item v-if="data[1].Name" :item="data[1]"  :id="data[1].Id" :name="data[1].Name" :title="title" :titleIndex="data[1].Sex == '男' ? 0 : 1"></item>
                 <branch-add v-else :title="[title[1]]" @add="reviceF"></branch-add>
 
             </div>
@@ -50,7 +50,6 @@
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
     import Pup from "@/components/branch/_up";
-    import edit from "@/components/branch/edit"
     import { treeChange } from "@/lib/common"
     export default {
         name: 'branch-up',
@@ -58,8 +57,7 @@
             branchAdd,
             item,
             linkLine,
-            Pup,
-            edit
+            Pup
         },
         props: {
             data: Array,
@@ -75,8 +73,6 @@
                     ['祖父', '祖母'],
                     ['外祖父', '外祖母']
                 ],
-                brand_male: null,
-                brand_famale: null,
                 editShow: false,
                 editData: null
             }
@@ -90,7 +86,7 @@
                 const params = await treeChange(e)
 
                 data[1] = params;
-                this.inifData();
+                this.initData();
                 this.$forceUpdate();
                 // Bus.$emit('treeChange', params)
 
@@ -103,7 +99,7 @@
                 const params = await treeChange(e)
 
                 data[0] = params;
-                this.inifData();
+                this.initData();
                 this.$forceUpdate();
                 // Bus.$emit('treeChange', params)
 
@@ -113,7 +109,7 @@
                 // data.push(e);
                 // Bus.$emit('treeChange', e)
             },
-            inifData() {
+            initData() {
                 const module = {
                         Id: null,
                         Name: null,
@@ -130,15 +126,17 @@
                             Spouse: []
                         }]
                     }
-                this.brand_male = this.data[0] || module;
-                this.brand_famale = this.data[1] || module;
 
-                if (this.brand_male.Parent.length == 0) {
-                    this.brand_male.Parent = [module]
+                this.data || (this.data = [module, module])
+                this.data[0] || (this.data[0] = module);
+                this.data[1] || (this.data[1] = module);
+
+                if (this.data[0].Parent.length == 0) {
+                    this.data[0].Parent = [module,module]
                 }
 
-                if (this.brand_famale.Parent.length == 0) {
-                    this.brand_famale.Parent = [module]
+                if (this.data[1].Parent.length == 0) {
+                    this.data[1].Parent = [module,module]
                 }
             },
             handleClick(e){
@@ -150,12 +148,12 @@
             }
         },
         mounted() {
-            this.inifData();
+            this.initData();
         },
         watch:{
             data:{
                 handler(){
-                    this.inifData();
+                    this.initData();
                 },
                 deep: true
             }
