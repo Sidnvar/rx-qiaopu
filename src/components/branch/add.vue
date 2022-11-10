@@ -54,6 +54,10 @@
             spouse: {
                 type: Array,
                 default: () => []
+            },
+            index: {
+                type: [String, Number],
+                default: () => 0
             }
         },
         data() {
@@ -68,7 +72,7 @@
             add(){
                 this.show = false;
                 const Parent = this.parent == '请选择父/母' ? [] : [this.parent];
-                this.$emit('add', {
+                this.$emit('add', {data:{
                     Id: null,
                     Name: this.username,
                     Sex: this.checked == 0 ? '男': '女',
@@ -76,7 +80,7 @@
                     Parent,
                     Brother: [],
                     Spouse: []
-                })
+                },index: this.index})
             }
         },
         mounted(){

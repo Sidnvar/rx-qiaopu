@@ -8,12 +8,36 @@
         </div>
 
         <div v-for="(item, key) in data" :key="key">
-            <item :id="item.Id" :item="item" :name="item.Name" :title="title" :titleIndex="item.Sex == '男' ? 0 : 1" ></item>
+            <item 
+            :id="item.Id" 
+            :item="item" 
+            :name="item.Name" 
+            :title="title" 
+            :titleIndex="item.Sex == '男' ? 0 : 1" 
+            :isDel="true"
+            @del="handleDelete"
+            ></item>
         </div>
     </div>
 </template>
 
 <script>
+    const module = {
+        Id: null,
+        Name: null,
+        Parent: [{
+            Id: null,
+            Name: null,
+            Parent: [],
+            Spouse: []
+        }],
+        Spouse: [{
+            Id: null,
+            Name: null,
+            Parent: [],
+            Spouse: []
+        }]
+    }
     import branchAdd from "./add.vue"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
@@ -48,12 +72,18 @@
             }
         },
         methods: {
+            handleDelete(item) {
+                const index = this.data.findIndex(_item => _item.Id == item.Id)
+                this.data.splice(index, 1)
+                this.$forceUpdate();
+                this.addLinkLine();
+            },
             async revice(e) {
                 const {
                     data
                 } = this;
 
-                const params = await treeChange(e)
+                const params = await treeChange(e.data)
 
                 data.unshift(params);
             },

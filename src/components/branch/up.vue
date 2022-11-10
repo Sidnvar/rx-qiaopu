@@ -2,9 +2,9 @@
 <template>
     <div class="" id="branch-up" v-if="index < 2">
         <div class="box-flex center" v-if="data[0]">
-            <div class="relative">
+            <div class="relative" v-for="(item, key) in data" :key="key">
 
-                <Pup v-if="data[0].Parent.length != 0" :data="data[0].Parent" :title="grand[0]"></Pup>
+                <Pup v-if="item.Parent.length != 0" :data="item.Parent" :title="grand[key]"></Pup>
 
                 <linkLine :set='[
                     [1.6, 0.6, 4.8, 0.6],
@@ -12,15 +12,14 @@
                     [4.8, 0, 4.8, 0.6],
                     [3.2, 0.6, 3.2, 1.2]]'></linkLine>
 
-                <item v-if="data[0].Name" :item="data[0]" :id="data[0].Id" :name="data[0].Name" :title="title" :titleIndex="data[0].Sex == '男' ? 0 : 1"></item>
-                <branch-add v-else :title="[title[0]]" @add="revice"></branch-add>
+                <item v-if="item.Name" :item="item" :id="item.Id" :name="item.Name" :title="title" :isDel="isDel[key]"
+                    @del="handleDelete" :titleIndex="item.Sex == '男' ? 0 : 1"></item>
+                <branch-add v-else :index="key" :title="[title[key]]" @add="revice"></branch-add>
 
             </div>
 
-            <div class="relative">
-                <!-- <branch-up v-if="brand_famale.Parent" :data="brand_famale.Parent" :index="index+1" :title="grand[1]"
-                    ref="spouseParent">
-                </branch-up> -->
+            <!-- <div class="relative">
+
 
                 <Pup v-if="data[1].Parent" :data="data[1].Parent" :title="grand[1]"></Pup>
 
@@ -30,10 +29,16 @@
                     [4.8, 0, 4.8, 0.6],
                     [3.2, 0.6, 3.2, 1.2]]'></linkLine>
 
-                <item v-if="data[1].Name" :item="data[1]"  :id="data[1].Id" :name="data[1].Name" :title="title" :titleIndex="data[1].Sex == '男' ? 0 : 1"></item>
+                <item 
+                v-if="data[1].Name" 
+                :item="data[1]"  
+                :id="data[1].Id" 
+                :name="data[1].Name" 
+                :title="title" 
+                :titleIndex="data[1].Sex == '男' ? 0 : 1"></item>
                 <branch-add v-else :title="[title[1]]" @add="reviceF"></branch-add>
 
-            </div>
+            </div> -->
 
             <!-- <div v-else>
                 <branch-add :title="[title[1]]"></branch-add>
@@ -46,11 +51,29 @@
 </template>
 
 <script>
+    const module = {
+        Id: null,
+        Name: null,
+        Parent: [{
+            Id: null,
+            Name: null,
+            Parent: [],
+            Spouse: []
+        }],
+        Spouse: [{
+            Id: null,
+            Name: null,
+            Parent: [],
+            Spouse: []
+        }]
+    }
     import branchAdd from "./add.vue"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
     import Pup from "@/components/branch/_up";
-    import { treeChange } from "@/lib/common"
+    import {
+        treeChange
+    } from "@/lib/common"
     export default {
         name: 'branch-up',
         components: {
@@ -73,86 +96,60 @@
                     ['祖父', '祖母'],
                     ['外祖父', '外祖母']
                 ],
+                checkId: 0,
                 editShow: false,
-                editData: null
+                editData: null,
+                isDel: [false, false]
             }
         },
         methods: {
-            async reviceF(e) {
-                const {
-                    data
-                } = this;
-
-                const params = await treeChange(e)
-
-                data[1] = params;
+            handleDelete(item) {
+                const index = this.data.findIndex(_item => _item.Id == item.Id)
+                this.data[index] = module
                 this.initData();
                 this.$forceUpdate();
-                // Bus.$emit('treeChange', params)
-
             },
             async revice(e) {
                 const {
                     data
                 } = this;
 
-                const params = await treeChange(e)
-
-                data[0] = params;
+                const params = await treeChange(e.data)
+                data[e.index] = params;
                 this.initData();
                 this.$forceUpdate();
-                // Bus.$emit('treeChange', params)
-
-                // console.log(data)
-                // if(data.)
-
-                // data.push(e);
-                // Bus.$emit('treeChange', e)
             },
             initData() {
-                const module = {
-                        Id: null,
-                        Name: null,
-                        Parent: [{
-                            Id: null,
-                            Name: null,
-                            Parent: [],
-                            Spouse: []
-                        }],
-                        Spouse: [{
-                            Id: null,
-                            Name: null,
-                            Parent: [],
-                            Spouse: []
-                        }]
-                    }
+
 
                 this.data || (this.data = [module, module])
                 this.data[0] || (this.data[0] = module);
                 this.data[1] || (this.data[1] = module);
 
                 if (this.data[0].Parent.length == 0) {
-                    this.data[0].Parent = [module,module]
+                    this.data[0].Parent = [module, module];
+                    this.isDel[0] = true;
                 }
 
                 if (this.data[1].Parent.length == 0) {
-                    this.data[1].Parent = [module,module]
+                    this.data[1].Parent = [module, module];
+                    this.isDel[1] = true;
                 }
             },
-            handleClick(e){
+            handleClick(e) {
                 this.editData = e;
                 this.editShow = true
             },
-            editPost(e){
+            editPost(e) {
 
             }
         },
         mounted() {
             this.initData();
         },
-        watch:{
-            data:{
-                handler(){
+        watch: {
+            data: {
+                handler() {
                     this.initData();
                 },
                 deep: true

@@ -2,25 +2,47 @@
 <template>
     <div id="branch-up">
         <div class="box-flex center">
-            <div class="relative">
-                <item v-if="data[0].Name" :item="data[0]" :id="data[0].Id" :name="data[0].Name" :title="title" :titleIndex="data[0].Sex == '男' ? 0 : 1"></item>
+            <div class="relative" v-for="(item, key) in data" :key="key">
+                <item 
+                v-if="item.Name"  
+                :item="item" 
+                :id="item.Id" 
+                :name="item.Name" 
+                :title="title" 
+                :titleIndex="item.Sex == '男' ? 0 : 1"
+                :isDel="true"
+                @del="handleDelete"></item>
 
-                <!-- <item v-if="brand_male.Name" :id="brand_male.Id" :name="brand_male.Name" :title="title" :titleIndex="0" ></item> -->
-                <branch-add v-else :title="[title[0]]" @add="revice"></branch-add>
+                <branch-add v-else :index="key" :title="[title[key]]" @add="revice"></branch-add>
             </div>
 
-            <div class="relative">
+            <!-- <div class="relative">
                 <item v-if="data[1].Name" :item="data[1]"  :id="data[1].Id" :name="data[1].Name" :title="title" :titleIndex="data[1].Sex == '男' ? 0 : 1"></item>
 
-                <!-- <item v-if="brand_famale.Name" :id="brand_famale.Id" :name="brand_famale.Name" :title="title" :titleIndex="1"></item> -->
                 <branch-add v-else :title="[title[1]]" @add="reviceF"></branch-add>
-            </div>
+            </div> -->
         </div>
 
     </div>
 </template>
 
 <script>
+    const module = {
+        Id: null,
+        Name: null,
+        Parent: [{
+            Id: null,
+            Name: null,
+            Parent: [],
+            Spouse: []
+        }],
+        Spouse: [{
+            Id: null,
+            Name: null,
+            Parent: [],
+            Spouse: []
+        }]
+    }
     import branchAdd from "./add.vue"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
@@ -50,28 +72,21 @@
             }
         },
         methods: {
-            async reviceF(e) {
-                const {
-                    data
-                } = this;
-
-                const params = await treeChange(e)
-
-                data[1] = params;
+            handleDelete(item) {
+                const index = this.data.findIndex(_item => _item.Id == item.Id)
+                this.data[index] = module
                 this.initData();
                 this.$forceUpdate();
-
             },
             async revice(e) {
                 const {
                     data
                 } = this;
-                const params = await treeChange(e)
 
-                data[0] = params;
+                const params = await treeChange(e.data)
+                data[e.index] = params;
                 this.initData();
                 this.$forceUpdate();
-
             },
             initData() {
                 const module = {

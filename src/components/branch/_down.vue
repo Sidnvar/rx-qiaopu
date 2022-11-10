@@ -11,16 +11,10 @@
                     :item="item" 
                     :title="title" 
                     :titleIndex="item.Sex == '男' ? 0 : 1" 
-                    :id="item.Id" 
-                    :isDel="item.Children.length == 0"
+                    :id="item.Id"
+                    :isDel="true"
                     @del="handleDelete"
                     style="justify-content: flex-end;"></item>
-                    <Pdown v-if="item.Children && children_title" 
-                    :data="item.Children" 
-                    :title="children_title" 
-                    :index="key"
-                    :parentSex="parentSex"
-                    :last="true"></Pdown>
                 </div>
             </div>
         </div>
@@ -29,25 +23,9 @@
 </template>
 
 <script>
-    const module = {
-        Id: null,
-        Name: null,
-        Parent: [{
-            Id: null,
-            Name: null,
-            Parent: [],
-            Spouse: []
-        }],
-        Spouse: [{
-            Id: null,
-            Name: null,
-            Parent: [],
-            Spouse: []
-        }]
-    }
+
     import branchAdd from "./add.vue"
     import item from "./item.vue"
-    import Pdown from "@/components/branch/_down";
     import linkLine from "@/components/branch/linkLine";
     import { treeChange } from "@/lib/common"
 
@@ -70,8 +48,7 @@
         components: {
             branchAdd,
             item,
-            linkLine,
-            Pdown
+            linkLine
         },
         data() {
             return {
@@ -85,8 +62,9 @@
         methods:{
             handleDelete(item) {
                 const index = this.data.findIndex(_item => _item.Id == item.Id)
-                this.data.splice(index, 1)                
+                this.data.splice(index, 1)
                 this.$forceUpdate();
+                this.addLinkLine();
             },
             addLinkLine(){
                 this.sets = [[1.6, 0, 1.6, 1.2]];

@@ -10,10 +10,14 @@
             </div>
         </div>
 
-       <van-popup v-model="show">
+        <van-popup v-model="show">
             <div style="width:90vw;margin:.6rem">
                 <van-form>
-                    <van-cell-group>
+                    <div class="del" @click="del" v-if="isDel">
+                        <van-icon name="delete-o" size="24" />
+                        删除
+                    </div>
+                    <van-cell-group :border="false">
                         <van-field name="radio" label="">
                             <template #input>
                                 <van-radio-group v-model="checked" direction="horizontal">
@@ -23,7 +27,7 @@
                         </van-field>
                     </van-cell-group>
                     <van-cell-group>
-                        <van-field v-model="i_name" name="姓名"/>
+                        <van-field v-model="i_name" name="姓名" />
                     </van-cell-group>
                     <div style="display:flex;margin-top:.3rem;padding:.3rem">
                         <van-button round block size="normal" native-type="submit" @click="show = false">
@@ -45,7 +49,13 @@
 
 <script>
     import Bus from "@/lib/bus.js"
-    import { treeChange } from "@/lib/common"
+    import {
+        treeChange
+    } from "@/lib/common"
+    import {
+        Dialog
+    } from 'vant';
+    import 'vant/es/dialog/style';
 
     export default {
         props: {
@@ -54,10 +64,14 @@
             title: Array,
             titleIndex: Number,
             id: [String, Number],
-            customClass: String
+            customClass: String,
+            isDel:{
+                type: Boolean,
+                default: () => false
+            }
         },
-        data(){
-            return{
+        data() {
+            return {
                 show: false,
                 checked: 0,
                 i_name: null
@@ -80,13 +94,39 @@
                 //     title: this.title
                 // })
             },
-            async submit(){
+            async submit() {
                 this.item.Name = this.i_name;
                 this.item.Sex = this.checked == 0 ? '男' : '女';
                 await treeChange(this.item);
                 this.show = false;
+            },
+            del() {
+                Dialog.confirm({
+                        title: '警告',
+                        message: `确认移除【${this.name}】吗`,
+                    })
+                    .then(() => {
+                        this.$emit('del', this.item);
+                        this.show = false;
+                        // del item;
+                        // on confirm
+                        // change();
+                    })
+                    .catch(() => {
+                        // on cancel
+                    });
 
+                return
             }
         }
     }
 </script>
+
+<style lang="less" scoped>
+    .del {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        color: #ccc;
+    }
+</style>
