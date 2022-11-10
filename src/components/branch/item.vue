@@ -49,12 +49,15 @@
 
 <script>
     import Bus from "@/lib/bus.js"
+    import { DeleteNode } from "@/api/index"
     import {
         treeChange
     } from "@/lib/common"
     import {
-        Dialog
+        Dialog,
+        Toast
     } from 'vant';
+    import 'vant/es/toast/style';
     import 'vant/es/dialog/style';
 
     export default {
@@ -106,8 +109,14 @@
                         message: `确认移除【${this.name}】吗`,
                     })
                     .then(() => {
-                        this.$emit('del', this.item);
-                        this.show = false;
+                        DeleteNode({
+                            mainId: this.item.Id
+                        }).then(res => {
+                            this.$emit('del', this.item);
+                            this.show = false;
+                            Toast('删除成功')
+                        })
+
                         // del item;
                         // on confirm
                         // change();

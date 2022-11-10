@@ -5,7 +5,7 @@
             <div style="width: min-content;" v-if="data">
 
                 <!-- 分支向上 长辈 -->
-                <branch-up :data="data.Parent" :index="0"></branch-up>
+                <branch-up :data="data.Parent" :index="0" :sourceId="data.Id"></branch-up>
 
                 <div class="relative">
                     <linkLine style="left: calc(50% - 8rem);" :set='[
@@ -15,19 +15,20 @@
                     [8, .6, 8, 1.2]]'></linkLine>
                     <div class="box-flex center">
                         <!-- 分支向左 兄弟 -->
-                        <branch-left :data="data.Brother"></branch-left>
+                        <branch-left :data="data.Brother" :sourceId="data.Id"></branch-left>
 
                         <!-- 本人 -->
-                        <branch-item id="self" :name="data.Name" :title="['本人']" :titleIndex="0" customClass="self"></branch-item>
+                        <branch-item id="self" :name="data.Name" :title="['本人']" :titleIndex="0" customClass="self">
+                        </branch-item>
 
                         <!-- 分支向右 配偶 -->
-                        <branch-right :data="data.Spouse"></branch-right>
+                        <branch-right :data="data.Spouse" :sourceId="data.Id"></branch-right>
                     </div>
 
                 </div>
                 <!-- 分支向下 儿孙 -->
-                <branch-down :data="data.Children" :index="0" :parentSex="parentSex" :last="false"
-                    :spouse="data.Spouse"></branch-down>
+                <branch-down :data="data.Children" :index="0" :parentSex="parentSex" :last="false" :spouse="data.Spouse"
+                    :sourceId="data.Id"></branch-down>
 
             </div>
 
@@ -42,13 +43,13 @@
         </div>
 
 
-        <van-popup v-model="popupShow">
+        <!-- <van-popup v-model="popupShow">
             <div style="width:90vw;margin:.6rem">
                 <van-form>
                     <van-cell-group>
                         <van-field name="radio" label="">
                             <template #input>
-                                <h2>检测“{{popupData.Name}}”与其它侨谱中有重名，是否关联？</h2>
+                                <h2>检测“{{popupData.Name}}”与其它侨谱中有重名，是否将您的联系方式发送给相关人员进行确认进行关联</h2>
                             </template>
                         </van-field>
 
@@ -68,7 +69,7 @@
                     </div>
                 </van-form>
             </div>
-        </van-popup>
+        </van-popup> -->
     </div>
 </template>
 
@@ -79,10 +80,16 @@
     import {
         GetUserRelation,
         getToken,
-        EditUserRelation
+        EditUserRelation,
+        SendMessage
     } from "@/api/index"
-    import { Dialog, Toast } from 'vant';
+    import {
+        Dialog,
+        Toast
+    } from 'vant';
     import 'vant/es/dialog/style';
+    import 'vant/es/toast/style';
+
     import branchItem from "@/components/branch/item";
     import branchUp from "@/components/branch/up";
     import branchDown from "@/components/branch/down";
@@ -115,17 +122,17 @@
                 isChanging: false // 数据是否修改过
             }
         },
-       async mounted() {
+        async mounted() {
             await getToken();
             console.log(this.$route.query.returnUrl)
             this.getData(this.$route.query.id);
 
             Bus.$on('change', res => {
                 const change = () => {
-                            this.data = [];
-                            this.$forceUpdate();
-                            this.centerId = res.id;
-                            this.getData(res.id);
+                    this.data = [];
+                    this.$forceUpdate();
+                    this.centerId = res.id;
+                    this.getData(res.id);
                 }
                 if (this.isChanging) {
                     Dialog.confirm({
@@ -148,43 +155,52 @@
 
             Bus.$on('treeChange', res => {
                 this.isChanging = true;
+
                 // do ajax
-
-                // const {
-                //     Name,
-                //     Sex
-                // } = res;
-                // CheckUserName({
-                //     Name,
-                //     Sex,
-                //     Id: 0
-                // }).then(res => {
-                    this.setStyle();
-
-                //     console.log(res)
-                // })
-
-                // setTimeout(() => {
-                //     this.setStyle();
-
-                //     // 如果重名
-                //     this.theSameName(res);
-                // }, 500)
+                this.setStyle();
             })
 
+            Bus.$on('sameName', res => {
+                Dialog.confirm({
+                        title: '警告',
+                        message: `检测“${res.data.Name}”与其它侨谱中有重名，是否将您的联系方式发送给相关人员进行确认进行关联`,
+                    })
+                    .then(() => {
+                        // on confirm
+                        // change();
+                        SendMessage({
+                            sendToUserNo: res.sendToUserNo
+                        }).then(res => {
+                            Toast('发送成功')
+                        })
+                    })
+                    .catch(() => {
+                        // on cancel
+                    });
+
+                // this.theSameName();
+            })
+
+            Bus.$on('save', res => {
+                this.post('auto');
+            })
         },
         methods: {
-            post() {
+            post(type) {
                 EditUserRelation([this.data]).then(res => {
                     this.isChanging = false;
-                    
-                    if(res.Code == 200){
-                        Toast('保存成功');
-                        setTimeout(() => {
-                            location.href = this.$route.query.returnUrl;
-                        }, 3000)
+
+                    if (res.Code == 200) {
+                        Toast('添加成功');
+
+                        if(!type){
+                            setTimeout(() => {
+                                location.href = this.$route.query.returnUrl;
+                            }, 3000)
+                        }
+           
                     }
-                    
+
                     // this.getData(this.centerId)
                     // console.log(res)
                 })

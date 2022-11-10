@@ -22,30 +22,16 @@
 </template>
 
 <script>
-    const module = {
-        Id: null,
-        Name: null,
-        Parent: [{
-            Id: null,
-            Name: null,
-            Parent: [],
-            Spouse: []
-        }],
-        Spouse: [{
-            Id: null,
-            Name: null,
-            Parent: [],
-            Spouse: []
-        }]
-    }
     import branchAdd from "./add.vue"
+    import Bus from "@/lib/bus.js"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
     import { treeChange } from "@/lib/common"
 
     export default {
         props: {
-            data: Array
+            data: Array,
+            sourceId: [String, Number]
         },
         components: {
             branchAdd,
@@ -83,9 +69,12 @@
                     data
                 } = this;
 
-                const params = await treeChange(e.data)
+                const params = await treeChange(e.data, this.sourceId)
+                if(params){
+                    data.unshift(params);
+                    Bus.$emit('save', true)
+                }
 
-                data.unshift(params);
             },
             addLinkLine() {
                 this.sets = [];

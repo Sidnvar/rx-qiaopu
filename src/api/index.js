@@ -41,3 +41,20 @@ export const EditUserRelation = data => {
     data
   })
 }
+
+export const SendMessage = params => {
+  return request({
+    url: `${BASR_API}/User/SendMessage`,
+    method: 'POST',
+    params
+  })
+}
+
+export const DeleteNode = params => {
+  return request({
+    url: `${BASR_API}/User/DeleteNode`,
+    method: 'POST',
+    params
+  })
+}
+

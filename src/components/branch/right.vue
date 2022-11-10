@@ -22,12 +22,14 @@
 
     import branchAdd from "./add.vue"
     import item from "./item.vue"
+    import Bus from "@/lib/bus.js"
     import linkLine from "@/components/branch/linkLine";
     import { treeChange } from "@/lib/common"
 
     export default {
         props: {
-            data: Array
+            data: Array,
+            sourceId: [String, Number]
         },
         components: {
             branchAdd,
@@ -50,8 +52,12 @@
                 const {
                     data
                 } = this;
-                const params = await treeChange(e.data)
-                data.push(params);
+                const params = await treeChange(e.data, this.sourceId)
+                if(params){
+                    data.push(params);
+                    Bus.$emit('save', true)
+                }
+
             }
         },
         watch:{

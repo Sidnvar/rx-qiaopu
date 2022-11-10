@@ -20,6 +20,7 @@
                     :title="children_title" 
                     :index="key"
                     :parentSex="parentSex"
+                    :sourceId="item.Id"
                     :last="true"></Pdown>
                 </div>
             </div>
@@ -29,23 +30,9 @@
 </template>
 
 <script>
-    const module = {
-        Id: null,
-        Name: null,
-        Parent: [{
-            Id: null,
-            Name: null,
-            Parent: [],
-            Spouse: []
-        }],
-        Spouse: [{
-            Id: null,
-            Name: null,
-            Parent: [],
-            Spouse: []
-        }]
-    }
+
     import branchAdd from "./add.vue"
+    import Bus from "@/lib/bus.js"
     import item from "./item.vue"
     import Pdown from "@/components/branch/_down";
     import linkLine from "@/components/branch/linkLine";
@@ -65,7 +52,8 @@
             },
             parentSex: [Number, String],
             last: Boolean,
-            spouse: Array
+            spouse: Array,
+            sourceId: [String, Number]
         },
         components: {
             branchAdd,
@@ -111,8 +99,11 @@
             },
             async revice(e){
                 const { data } = this;
-                const params = await treeChange(e.data)
-                data.unshift(params);
+                const params = await treeChange(e.data, this.sourceId)
+                if(params){
+                    data.unshift(params);
+                    Bus.$emit('save', true)
+                }
 
                 // Bus.$emit('treeChange', e)
             }

@@ -44,6 +44,7 @@
         }]
     }
     import branchAdd from "./add.vue"
+    import Bus from "@/lib/bus.js"
     import item from "./item.vue"
     import linkLine from "@/components/branch/linkLine";
     import { treeChange } from "@/lib/common"
@@ -61,7 +62,9 @@
                 typeof: Object,
                 default: () => ['父', '母']
             },
-            index: [String, Number]
+            index: [String, Number],
+            sourceId: [String, Number]
+
         },
         data() {
             return {
@@ -83,10 +86,11 @@
                     data
                 } = this;
 
-                const params = await treeChange(e.data)
-                data[e.index] = params;
-                this.initData();
-                this.$forceUpdate();
+                const params = await treeChange(e.data, this.sourceId)
+                if(params){
+                    data[e.index] = params;
+                    Bus.$emit('save', true)
+                }
             },
             initData() {
                 const module = {
