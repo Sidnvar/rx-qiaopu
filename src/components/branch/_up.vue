@@ -2,18 +2,20 @@
 <template>
     <div id="branch-up">
         <div class="box-flex center">
-            <div class="relative" v-for="(item, key) in data" :key="key">
+            <div class="relative" v-for="(item, key) in data" :key="key"  v-if="key < 2">
                 <item 
+                @updateEvent="updateEvent"
                 v-if="item.Name"  
                 :item="item" 
                 :id="item.Id" 
+                :sourceId="sourceId"
                 :name="item.Name" 
                 :title="title" 
                 :titleIndex="item.Sex == '男' ? 0 : 1"
                 :isDel="true"
                 @del="handleDelete"></item>
 
-                <branch-add v-else :index="key" :title="[title[key]]" @add="revice"></branch-add>
+                <branch-add v-else :index="key" :title="title" @add="revice"></branch-add>
             </div>
 
             <!-- <div class="relative">
@@ -63,7 +65,7 @@
                 default: () => ['父', '母']
             },
             index: [String, Number],
-            sourceId: [String, Number]
+            sourceId: [String, Number],
 
         },
         data() {
@@ -75,6 +77,11 @@
             }
         },
         methods: {
+            updateEvent(){
+                // debugger
+                this.$forceUpdate();
+                console.log(this.$refs.pup)
+            },
             handleDelete(item) {
                 const index = this.data.findIndex(_item => _item.Id == item.Id)
                 this.data[index] = module
@@ -87,9 +94,14 @@
                 } = this;
 
                 const params = await treeChange(e.data, this.sourceId)
+                // debugger
                 if(params){
+                    // const _params = params;
+                    // data[e.index] = module;
                     data[e.index] = params;
+                    this.$forceUpdate();
                     Bus.$emit('save', true)
+                    // this.$emit('addParent', {data: params, index: e.index, pIndex: this.index})
                 }
             },
             initData() {

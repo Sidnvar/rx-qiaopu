@@ -9,6 +9,7 @@
                     <item 
                     :name="item.Name" 
                     :item="item" 
+                    :sourceId="sourceId"
                     :title="title" 
                     :titleIndex="item.Sex == '男' ? 0 : 1" 
                     :id="item.Id"

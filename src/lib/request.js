@@ -11,7 +11,9 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // config.url += '?UserNo=' + UserNo;
-    config.url += '?userNo=tMdLaQ0C7URc8uekFCmG9g==';
+    
+
+    config.url += `?userNo=${sessionStorage.getItem('userNo')}`;
   
     if(!!config.url.indexOf('/Token/GetToken')){
       // const { token } = store.state.base;

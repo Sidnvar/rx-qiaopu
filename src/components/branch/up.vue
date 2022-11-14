@@ -2,9 +2,9 @@
 <template>
     <div class="" id="branch-up" v-if="index < 2">
         <div class="box-flex center" v-if="data[0]">
-            <div class="relative" v-for="(item, key) in data" :key="key">
+            <div class="relative" v-for="(item, key) in data" :key="key" v-if="key < 2">
 
-                <Pup v-if="item.Parent.length != 0" :data="item.Parent" :title="grand[key]" :sourceId="data.Id"></Pup>
+                <Pup ref="pup" v-if="item.Parent.length != 0" :data="item.Parent" :index="key" :title="grand[key]" :sourceId="data.Id" @addParent="addParent"></Pup>
 
                 <linkLine :set='[
                     [1.6, 0.6, 4.8, 0.6],
@@ -12,9 +12,9 @@
                     [4.8, 0, 4.8, 0.6],
                     [3.2, 0.6, 3.2, 1.2]]'></linkLine>
 
-                <item v-if="item.Name" :item="item" :id="item.Id" :name="item.Name" :title="title" :isDel="isDel[key]"
+                <item v-if="item.Name" @updateEvent="updateEvent" :sourceId="sourceId" :item="item" :id="item.Id" :name="item.Name" :title="title" :isDel="isDel[key]"
                     @del="handleDelete" :titleIndex="item.Sex == '男' ? 0 : 1"></item>
-                <branch-add v-else :index="key" :title="[title[key]]" @add="revice"></branch-add>
+                <branch-add v-else :index="key" :title="title" @add="revice"></branch-add>
 
             </div>
 
@@ -55,6 +55,11 @@
         Id: null,
         Name: null,
         Parent: [{
+            Id: null,
+            Name: null,
+            Parent: [],
+            Spouse: []
+        },{
             Id: null,
             Name: null,
             Parent: [],
@@ -105,6 +110,16 @@
             }
         },
         methods: {
+            updateEvent(){
+                // debugger
+                this.$forceUpdate();
+                console.log(this.$refs.pup)
+            },
+            addParent(e){
+                this.data[e.pIndex].Parent[e.index] = e.data;
+                this.$forceUpdate();
+                Bus.$emit('save', true)
+            },
             handleDelete(item) {
                 const index = this.data.findIndex(_item => _item.Id == item.Id)
                 this.data[index] = module
@@ -118,12 +133,14 @@
 
                 const params = await treeChange(e.data, this.sourceId)
                 if(params){
+                    const _parent = data[e.index].Parent
+                    params.Parent = _parent
                     data[e.index] = params;
                     Bus.$emit('save', true)
                 }
 
                 // this.initData();
-                // this.$forceUpdate();
+                this.$forceUpdate();
             },
             initData() {
 
@@ -131,7 +148,6 @@
                 this.data || (this.data = [module, module])
                 this.data[0] || (this.data[0] = module);
                 this.data[1] || (this.data[1] = module);
-
                 if (this.data[0].Parent.length == 0) {
                     this.data[0].Parent = [module, module];
                     this.isDel[0] = true;
@@ -141,6 +157,8 @@
                     this.data[1].Parent = [module, module];
                     this.isDel[1] = true;
                 }
+
+                console.log(this.data)
             },
             handleClick(e) {
                 this.editData = e;

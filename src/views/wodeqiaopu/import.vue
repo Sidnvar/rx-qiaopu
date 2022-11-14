@@ -15,10 +15,10 @@
                     [8, .6, 8, 1.2]]'></linkLine>
                     <div class="box-flex center">
                         <!-- 分支向左 兄弟 -->
-                        <branch-left :data="data.Brother" :sourceId="data.Id"></branch-left>
+                        <branch-left :data="data.Parent[fatherIndex].Children" :sourceId="data.Id"></branch-left>
 
                         <!-- 本人 -->
-                        <branch-item id="self" :name="data.Name" :title="['本人']" :titleIndex="0" customClass="self">
+                        <branch-item id="self" :self="true" :name="data.Name" :title="['本人']" :titleIndex="0">
                         </branch-item>
 
                         <!-- 分支向右 配偶 -->
@@ -119,6 +119,7 @@
                 },
                 centerId: 1,
                 parentSex: 0,
+                fatherIndex: 0,
                 isChanging: false // 数据是否修改过
             }
         },
@@ -126,6 +127,7 @@
             await getToken();
             console.log(this.$route.query.returnUrl)
             this.getData(this.$route.query.id);
+            sessionStorage.setItem('userNo', this.$route.query.userNo)
 
             Bus.$on('change', res => {
                 const change = () => {
@@ -157,6 +159,7 @@
                 this.isChanging = true;
 
                 // do ajax
+                this.$forceUpdate();
                 this.setStyle();
             })
 
@@ -183,33 +186,55 @@
 
             Bus.$on('save', res => {
                 this.post('auto');
+                this.$forceUpdate();
             })
         },
         methods: {
             post(type) {
-                EditUserRelation([this.data]).then(res => {
+                EditUserRelation([this.data]).then(async (res) => {
                     this.isChanging = false;
 
                     if (res.Code == 200) {
-                        Toast('添加成功');
+                        // await this.saveFunction();
+                        Toast('操作成功');
+                        setTimeout(() => {
+                            this.setStyle();
+                            this.setCenter();
+                        }, 500)
 
-                        if(!type){
+                        if (!type) {
                             setTimeout(() => {
                                 location.href = this.$route.query.returnUrl;
                             }, 3000)
                         }
-           
+
                     }
 
                     // this.getData(this.centerId)
                     // console.log(res)
                 })
             },
-            postLink() {},
-            theSameName(data) {
-                this.popupData = data;
-                this.popupShow = true;
+            async saveFunction() {
+                Toast('正在保存');
+                this.percentage = 0;
+                await GetUserRelation({
+                    userId: id
+                }).then(res => {
+                    this.data = res.Data[0];
+                    this.parentSex = this.data.Sex == '男' ? 0 : 1;
+                    
+                    // console.log(this.parentSex)
+                    // this.initZoom();
+
+                    setTimeout(() => {
+                        this.setPercentage(100);
+                        this.$forceUpdate();
+                        this.setStyle();
+                        this.setCenter();
+                    }, 500)
+                })
             },
+            postLink() {},
             setPercentage(max) {
                 setTimeout(() => {
                     this.percentage++
@@ -228,12 +253,43 @@
                     this.setPercentage(70);
                     this.data = res.Data[0];
                     this.parentSex = this.data.Sex == '男' ? 0 : 1;
+                    if (this.data.Parent.length == 2) {
+                        this.fatherIndex = this.data.Parent[0].Sex == '男' ? 0 : 1;
+                    } else if (this.data.Parent.length == 1) {
+                        this.fatherIndex = 0;
+                    } else {
+                        this.fatherIndex = 0;
+                        this.data.Parent.push({
+                            Id: null,
+                            Name: null,
+                            Children:[],
+                            Parent: [{
+                                Id: null,
+                                Name: null,
+                                Parent: [],
+                                Spouse: []
+                            }, {
+                                Id: null,
+                                Name: null,
+                                Parent: [],
+                                Spouse: []
+                            }],
+                            Spouse: [{
+                                Id: null,
+                                Name: null,
+                                Parent: [],
+                                Spouse: []
+                            }]
+                        })
+                    }
                     // console.log(this.parentSex)
                     // this.initZoom();
 
                     setTimeout(() => {
                         this.setStyle();
                         this.setCenter();
+                        this.$forceUpdate();
+
                     }, 500)
                 });
             },
@@ -292,6 +348,7 @@
         top: 0rem;
         height: 0.6rem;
         transform: scale(-1, 1);
+        width: 100%;
     }
 
     .vertical_l {

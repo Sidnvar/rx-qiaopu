@@ -1,9 +1,9 @@
 <template>
-    <div class="box" :class="customClass">
+    <div class="box" :class="{self: self}">
         <div class="box-item">
             <div class="name" @click.stop="handleClick">
                 {{name}}
-                <img @click.stop="change" v-if="!customClass && id" class="change" src="../../assets/change.png" />
+                <img @click.stop="change" v-if="!self && id" class="change" src="../../assets/change.png" />
             </div>
             <div class="title">
                 {{title[titleIndex]}}
@@ -71,6 +71,11 @@
             isDel:{
                 type: Boolean,
                 default: () => false
+            },
+            sourceId:[String, Number],
+            self: {
+                type: Boolean,
+                default: () => false
             }
         },
         data() {
@@ -88,6 +93,7 @@
                 })
             },
             handleClick() {
+                if(this.self) return;
                 this.show = true;
                 this.checked = this.titleIndex;
                 this.i_name = this.name
@@ -98,10 +104,14 @@
                 // })
             },
             async submit() {
+
                 this.item.Name = this.i_name;
                 this.item.Sex = this.checked == 0 ? '男' : '女';
-                await treeChange(this.item);
+                // debugger
+                await treeChange(this.item, this.sourceId);
                 this.show = false;
+
+                this.$emit('updateEvent', true)
             },
             del() {
                 Dialog.confirm({

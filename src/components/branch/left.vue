@@ -13,6 +13,7 @@
             :item="item" 
             :name="item.Name" 
             :title="title" 
+            :sourceId="sourceId"
             :titleIndex="item.Sex == '男' ? 0 : 1" 
             :isDel="true"
             @del="handleDelete"

@@ -9,12 +9,13 @@ import 'vant/es/toast/style';
 export const treeChange = async (e, sourceId) => {
     const {
         Name,
-        Sex
+        Sex,
+        Id
     } = e;
     const req = await CheckUserName({
         CheckName: Name,
         CheckSex: Sex,
-        CheckId: 0,
+        CheckId: Id || 0,
         Id: sourceId
     })
     if(req.Code == 200){

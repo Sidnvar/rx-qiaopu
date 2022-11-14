@@ -10,6 +10,7 @@
             :title="[`${key != 0 ? '(前)':''}配偶`]" 
             :titleIndex="0" 
             :isDel="true"
+            :sourceId="sourceId"
             @del="handleDelete"></item>
         </div>
         <div class="relative">
